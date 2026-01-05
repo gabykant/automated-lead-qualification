@@ -1,0 +1,210 @@
+{
+  "name": "Lead-qualification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e2ebb875-ecc6-4532-80b7-81a1d0f267f5",
+        "responseMode": "streaming",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        -32
+      ],
+      "id": "16b751a3-c420-4fc9-89ea-616940df716c",
+      "name": "Webhook",
+      "webhookId": "e2ebb875-ecc6-4532-80b7-81a1d0f267f5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fromEmail": "n8n-plus@ksoft-solutions.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Thanks for your request",
+        "html": "=Hi {{$json.name}},\n\nThanks for reaching out.\nWe’ve received your request and will get back to you shortly.\n\nBest regards,\nSales Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        64
+      ],
+      "id": "12a8abb6-f528-4780-a19e-e12a6fe5ed3c",
+      "name": "Auto Reply - WARM",
+      "webhookId": "db903a12-e703-4b6c-8012-c1940e6ffa17",
+      "credentials": {
+        "smtp": {
+          "id": "HYyX5HtzbZkMN0o4",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "n8n-plus@ksoft-solutions.com",
+        "toEmail": "g.kwaye@ksoft-solutions.com",
+        "subject": "=New HOT Lead – Score {{$json.score}}",
+        "html": "=A new high-priority lead has been received.\n\nName: {{$json.name}}\nEmail: {{$json.email}}\nCompany Size: {{$json.company_size}}\nBudget: {{$json.budget}}\nScore: {{$json.score}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        -128
+      ],
+      "id": "a6a55cfe-2551-4d78-a1df-891fdb91aaac",
+      "name": "Notify Sales – HOT",
+      "webhookId": "11c6436e-d487-4d02-91c7-501046d903fa",
+      "credentials": {
+        "smtp": {
+          "id": "HYyX5HtzbZkMN0o4",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6e321947-0d63-40b0-885d-268d4269a842",
+              "leftValue": "={{ $json.lead_status }}",
+              "rightValue": "    WARM",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b05018dc-2ac9-4ea1-9648-61a433c51211",
+              "leftValue": "={{ $json.lead_status }}",
+              "rightValue": "HOT",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        352,
+        -32
+      ],
+      "id": "0d1287d7-466c-4dab-ba88-037ca7482e09",
+      "name": "Route by Lead Status"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json.body;\n\n// Mapping simple et explicite\nreturn {\n  json: {\n    name: input.fullname || \"\",\n    email: input.email || \"\",\n    company_size: input.company_size || \"\",\n    budget: input.estimated_budget || \"\",\n    need: input.need || \"\",\n    urgent: input.urgent || \"\"\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        -32
+      ],
+      "id": "678a6f8b-2c5a-4a90-a570-e534085d23d1",
+      "name": "Normalize Input",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json;\n\nlet score = 0;\n\n// 1️⃣ Company size\nif (input.company_size === \"1-10\") score += 10;\nif (input.company_size === \"10-50\") score += 20;\nif (input.company_size === \"50+\") score += 30;\n\n// 2️⃣ Budget\nif (input.budget === \"$1,000 - $5,000\") score += 40;\nelse if (input.budget === \"$500 - $1,000\") score += 20;\nelse if (input.budget === \"0 - $500\") score += 5;\n\nif (input.need && input.need.toLowerCase().includes(\"automation\")) {\n  score += 20;\n}\n\nif (input.urgent.toLowerCase() === \"urgent\") score += 10;\n\n// 5️⃣ Classification\nlet lead_status = \"COLD\";\nif (score >= 70) lead_status = \"HOT\";\nelse if (score >= 40) lead_status = \"WARM\";\n\n// Output enrichi\nreturn {\n  json: {\n    ...input,\n    score,\n    lead_status\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -32
+      ],
+      "id": "017b97f8-c58e-482c-9931-45b7395a08db",
+      "name": "Lead Scoring"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Notify Sales – HOT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Auto Reply - WARM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Lead Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Scoring": {
+      "main": [
+        [
+          {
+            "node": "Route by Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "ac8ecfb9-9cb7-4cd2-8f20-5808cd13f2a9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "58e94dda3284e6698034ce62ed3f207cbe15fc9ad7c63f84c12309af96d724d5"
+  },
+  "id": "bnL679dwQdhrpMU4",
+  "tags": []
+}
