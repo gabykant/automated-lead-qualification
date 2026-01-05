@@ -92,4 +92,4 @@ Each lead is classified as **HOT**, **WARM**, or **COLD**, triggering the approp
 
 **Kwaye Gabriel**<br>
 _Automation & Backend Developer_<br>
-Available for freelance projects on Upwork
+Available for freelance projects on Upwork: _https://www.upwork.com/freelancers/~01b294ea71fb12952f_
