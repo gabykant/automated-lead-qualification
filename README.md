@@ -90,6 +90,6 @@ Each lead is classified as **HOT**, **WARM**, or **COLD**, triggering the approp
 
 ## 👤 Author
 
-**Kwaye Gabriel**
-_Automation & Backend Developer_
+**Kwaye Gabriel**<br>
+_Automation & Backend Developer_<br>
 Available for freelance projects on Upwork
