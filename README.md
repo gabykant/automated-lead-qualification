@@ -82,6 +82,8 @@ Each lead is classified as **HOT**, **WARM**, or **COLD**, triggering the approp
 
 ### Lead Scoring Output
 
+![Scoring](screenshots/lead-scoring-output.png)
+
 ### Email Notification Example
 
 ![Email](screenshots/email-example.png)
