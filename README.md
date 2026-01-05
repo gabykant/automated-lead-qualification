@@ -1,4 +1,6 @@
-# 🧠 Lead Qualification Automation (n8n)
+# Project Overview
+
+## 🧠 Lead Qualification Automation (n8n)
 
 **Automated lead qualification and routing using n8n (self-hosted).**
 
